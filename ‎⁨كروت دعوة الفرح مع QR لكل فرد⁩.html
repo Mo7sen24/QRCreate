@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>كروت دعوة الفرح مع QR لكل فرد</title>
+<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--bg:#f4eeee;--ink:#14213d;--panel:#fff;--line:#d9cfcf;--gold:#b88a2c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101523;--ink:#ece6df;--panel:#1a2136;--line:#33405f}}
+:root[data-theme="dark"]{--bg:#101523;--ink:#ece6df;--panel:#1a2136;--line:#33405f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Amiri,"Noto Naskh Arabic",serif;font-size:18px;line-height:1.7}
+h1,h2,button,label{font-family:"Reem Kufi",Tahoma,sans-serif}
+main{max-width:1000px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:28px;margin:8px 0 4px}
+.sub{margin:0 0 20px;opacity:.8}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.panel .wide{grid-column:1/-1}
+label{display:block;font-size:15px;margin-bottom:2px}
+input,textarea{width:100%;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:transparent;color:inherit}
+textarea{min-height:130px;resize:vertical}
+input:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+button{font-size:16px;padding:10px 20px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer}
+button.alt{background:transparent;color:var(--ink)}
+.note{font-size:15px;opacity:.75;margin:0}
+#cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px;margin-top:26px;justify-items:center}
+.card{width:100%;max-width:340px;aspect-ratio:3/5;background:#14213d;color:#f3e7d3;border-radius:6px;padding:12px;position:relative;break-inside:avoid}
+.card .frame{height:100%;border:1.5px solid #c9a24b;outline:1px solid #c9a24b;outline-offset:-7px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:18px 14px 14px;text-align:center}
+.bism{font-size:14px;color:#c9a24b;margin:0}
+.invite{font-size:15px;margin:0;line-height:1.6}
+.names{font-family:"Reem Kufi",sans-serif;font-weight:700;font-size:30px;line-height:1.25;margin:0;color:#fff}
+.names span{display:block;font-size:20px;color:#c9a24b;font-weight:500}
+.when{font-size:16px;margin:0;line-height:1.55}
+.guest{font-family:"Reem Kufi",sans-serif;font-size:19px;margin:0;color:#c9a24b}
+.qr{background:#fff;padding:8px;border-radius:8px;line-height:0}
+.qr img,.qr canvas{width:112px!important;height:112px!important}
+.code{font-family:ui-monospace,Menlo,monospace;direction:ltr;font-size:12px;letter-spacing:1px;margin:2px 0 0;color:#e9dcc3}
+.hint{font-size:12px;margin:0;opacity:.8}
+@media print{
+ body{background:#fff}
+ main>*:not(#cards){display:none!important}
+ #cards{margin:0;grid-template-columns:repeat(2,1fr);gap:12px}
+ .card{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<main>
+<h1>كروت دعوة الفرح</h1>
+<p class="sub">اكتب بيانات الفرح وعدد الدعوات، وكل دعوة هتطلع بـ QR مختلف.</p>
+<section class="panel">
+ <div><label for="groom">اسم العريس</label><input id="groom" value="أحمد"></div>
+ <div><label for="bride">اسم العروسة</label><input id="bride" value="سارة"></div>
+ <div><label for="date">التاريخ</label><input id="date" value="الجمعة ١٥ نوفمبر ٢٠٢٦"></div>
+ <div><label for="time">الوقت</label><input id="time" value="الساعة ٧ مساءً"></div>
+ <div class="wide"><label for="venue">المكان</label><input id="venue" value="قاعة النيل، القاهرة"></div>
+ <div class="wide"><label for="count">عدد الدعوات</label><input id="count" type="number" min="1" max="500" value="20" inputmode="numeric"></div>
+ <div class="wide"><label for="guests">أسماء المدعوين (اختياري، اسم في كل سطر)</label>
+  <textarea id="guests" placeholder="سيبها فاضية لو عايز دعوات بدون أسماء"></textarea></div>
+ <div class="wide actions">
+  <button id="gen">إنشاء الكروت</button>
+  <button id="print" class="alt">طباعة / حفظ PDF</button>
+  <button id="copy" class="alt">نسخ قائمة الأكواد</button>
+ </div>
+ <p class="note wide" id="status">كل QR فيه كود فريد. الكود نفسه مكتوب تحت الـ QR لو الماسح ماقراش.</p>
+</section>
+<section id="cards" aria-live="polite"></section>
+</main>
+<script>
+(function(){
+ var $=function(i){return document.getElementById(i)};
+ var list=[];
+ function rand(n){var s="",c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";var a=new Uint8Array(n);crypto.getRandomValues(a);for(var i=0;i<n;i++)s+=c[a[i]%c.length];return s}
+ var eventId=rand(4);
+ function build(){
+  var typed=$("guests").value.split("\n").map(function(s){return s.trim()}).filter(Boolean);
+  var cnt=Math.min(Math.max(parseInt($("count").value,10)||typed.length,0),500);
+  var names=[];for(var k=0;k<cnt;k++)names.push(typed[k]||"");
+  var box=$("cards");box.innerHTML="";list=[];
+  names.forEach(function(n,i){
+   var code="W"+eventId+"-"+String(i+1).padStart(3,"0")+"-"+rand(5);
+   list.push(code+"\t"+(n||"دعوة "+(i+1)));
+   var c=document.createElement("article");c.className="card";
+   var f=document.createElement("div");f.className="frame";
+   var top=document.createElement("div");
+   top.innerHTML='<p class="bism">بسم الله الرحمن الرحيم</p><p class="invite">يتشرف أهل العروسين<br>بدعوتكم لحضور حفل زفاف</p>';
+   var nm=document.createElement("p");nm.className="names";
+   var g=document.createElement("span"),b=document.createElement("span");
+   nm.append($("groom").value);nm.appendChild(g);g.textContent="و";nm.appendChild(document.createTextNode($("bride").value));
+   var wh=document.createElement("p");wh.className="when";
+   wh.append($("date").value,document.createElement("br"),$("time").value,document.createElement("br"),$("venue").value);
+   var gu=document.createElement("p");gu.className="guest";gu.textContent=n||("دعوة رقم "+(i+1));
+   var q=document.createElement("div");q.className="qr";
+   var cd=document.createElement("p");cd.className="code";cd.textContent=code;
+   var h=document.createElement("p");h.className="hint";h.textContent="الكارت يسمح بدخول فرد واحد فقط";
+   var mid=document.createElement("div");mid.append(nm);
+   var low=document.createElement("div");low.append(wh);
+   var qb=document.createElement("div");qb.append(q,cd);
+   f.append(top,mid,low,gu,qb,h);c.appendChild(f);box.appendChild(c);
+   new QRCode(q,{text:code,width:224,height:224,correctLevel:QRCode.CorrectLevel.M});
+  });
+  $("status").textContent=names.length?("تم إنشاء "+names.length+" كارت."):"اكتب عدد الدعوات.";
+ }
+ $("gen").onclick=build;
+ $("print").onclick=function(){if(!list.length)build();window.print()};
+ $("copy").onclick=function(){
+  var t=list.join("\n");
+  try{navigator.clipboard.writeText(t).then(function(){$("status").textContent="تم نسخ القائمة (الكود ← الاسم)."},function(){$("status").textContent="النسخ مش متاح هنا."})}
+  catch(e){$("status").textContent="النسخ مش متاح هنا."}
+ };
+ build();
+})();
+</script>
+</body>
+</html>
